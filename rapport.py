@@ -210,7 +210,7 @@ class FFNN:
     def one_step_forward(self, signal: np.array, cur_layer: Layer)-> np.array:
         # Compute the F and Z matrix for the current layer and return Z
         # TODO: Compute the dot product betzeen the signal and the current layer W matrix
-        S = np.dot(signal, cur_layer.W)
+        S = np.dot(signal,cur_layer.W)
         # TODO: Compute the F matrix of the current layer
         cur_layer.F = d_sigmoid(S).T
         # Compute the activation of the current layer
@@ -223,15 +223,15 @@ class FFNN:
 
         for i in range(1, self.nlayers):
             signal = self.layers[i-1].Z
-            cur_layer = self.layers[i]
-            _ = self.one_step_forward(signal, cur_layer)
+            self.one_step_forward(signal, self.layers[i]) 
+
 
         return self.layers[-1].Z
         
     
     def one_step_backward(self, prev_layer: Layer, cur_layer: Layer)-> Layer:
         # TODO: Compute the D matrix of the current layer using the previous layer and return the current layer
-        Di = cur_layer.F * np.dot(prev_layer.W, prev_layer.D)
+        Di = cur_layer.F * np.dot(prev_layer.W,prev_layer.D)
         cur_layer.D = Di
         return cur_layer
 
@@ -240,12 +240,10 @@ class FFNN:
         self.layers[-1].D = D_out.T
         # TODO: Compute the D matrix for all the layers (excluding the first one which corresponds to the input itself)
         # (you should only use self.layers[1:])
-        for i in range((self.nlayers)-1, 0, -1):
-            prev_layer = self.layers[i-1] 
-            cur_layer = self.layers[i]
-            _ = self.one_step_backward(prev_layer, cur_layer)
+        for i in range(self.nlayers-1, 1,-1):
+            self.layers[i+1] = self.one_step_backward(self.layers[i], self.layers[i+1])
 
-        return self.layers[0].D
+        
 
       
 
@@ -254,29 +252,30 @@ class FFNN:
     def update_weights(self, cur_layer: Layer, next_layer: Layer)-> Layer:
         # TODO: Update the W matrix of the next_layer using the current_layer and the learning rate
         # and return the next_layer
-        next_layer.W = next_layer.W - self.learning_rate*((np.dot(next_layer.D, cur_layer.Z)).T)
+        next_layer.W = next_layer.W -self.learning_rate * (np.dot(next_layer.D,cur_layer.Z)).T
         return next_layer
+        
         
     
     def update_all_weights(self)-> None:
         # TODO: Update all W matrix using the update_weights function
-        for i in range(0, (self.nlayers)-1):
-            cur_layer = self.layers[i]
-            next_layer = self.layers[i+1]
-            
-            _ = self.update_weights(cur_layer, next_layer)
+        for i in range(0,(self.nlayers)-1) :
+            self.layers[i+1] = self.update_weights(self.layers[i],self.layers[i+1])
        
       
     def get_error(self, y_pred: np.array, y_batch: np.array)-> float:
         # TODO: return the accuracy on the predictions
         # the accuracy should be in the [0.0, 1.0] range
-        sum = 0
+        pred = np.argmax(y_pred,axis=1)
+        batch = np.argmax(y_batch,axis=1)
+        match = 0
+        for i in range(len(pred)):
+            if pred[i] == batch[i]:
+                match += 1
+                
+        accuracy = match/len(pred)
 
-        for i in range (0, len(y_pred)):
-            if argmax(y_pred[i] == argmax(y_batch[i])):
-                sum = sum + 1
-
-        return sum
+        return accuracy
     
     def get_test_error(self, X: np.array, y: np.array)-> float:
         # TODO: Compute the accuracy using the get_error function
