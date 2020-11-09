@@ -221,12 +221,12 @@ class FFNN:
         # TODO: perform the whole forward pass using the on_step_forward function
         self.layers[0].Z = input_data
 
-        for i in range(1, self.nlayers):
+        for i in range(1,self.nlayers):
             signal = self.layers[i-1].Z
-            self.one_step_forward(signal, self.layers[i]) 
+            cur_layer = self.layers[i]
+            _ = self.one_step_forward(signal, cur_layer)
 
-
-        return self.layers[-1].Z
+        return self.layers[-1].Z 
         
     
     def one_step_backward(self, prev_layer: Layer, cur_layer: Layer)-> Layer:
@@ -240,12 +240,10 @@ class FFNN:
         self.layers[-1].D = D_out.T
         # TODO: Compute the D matrix for all the layers (excluding the first one which corresponds to the input itself)
         # (you should only use self.layers[1:])
-        for i in range(self.nlayers-1, 1,-1):
-            self.layers[i+1] = self.one_step_backward(self.layers[i], self.layers[i+1])
-
-        
-
-      
+        for i in range(self.nlayers-2,0,-1):
+            prev_layer = self.layers[i+1]
+            cur_layer = self.layers[i]
+            _ = self.one_step_backward(prev_layer, cur_layer) 
 
         
     
@@ -259,8 +257,10 @@ class FFNN:
     
     def update_all_weights(self)-> None:
         # TODO: Update all W matrix using the update_weights function
-        for i in range(0,(self.nlayers)-1) :
-            self.layers[i+1] = self.update_weights(self.layers[i],self.layers[i+1])
+        for i in range(0,(self.nlayers)-1):
+            cur_layer = self.layers[i]
+            next_layer = self.layers[i+1]
+            _ = self.update_weights(cur_layer, next_layer)
        
       
     def get_error(self, y_pred: np.array, y_batch: np.array)-> float:
@@ -272,7 +272,7 @@ class FFNN:
         for i in range(len(pred)):
             if pred[i] == batch[i]:
                 match += 1
-                
+
         accuracy = match/len(pred)
 
         return accuracy
@@ -285,7 +285,8 @@ class FFNN:
             X_batch = X[i,:,:].reshape(self.minibatch_size, -1)
             y_batch = y[i,:,:].reshape(self.minibatch_size, -1)           
             # TODO: get y_pred using the forward pass
-            error_sum += forward_pass(y_pred)
+            y_pred = self.forward_pass(X_batch)
+            error_sum += self.get_error(y_pred,y_batch)
         return error_sum / nbatch
             
         
@@ -304,7 +305,6 @@ class FFNN:
             for i in range(0, nbatch):
                 X_batch = X_train[i,:, :]
                 y_batch = y_train[i,:, :]
-        
                 y_pred = self.forward_pass(X_batch)
                 self.backward_pass(y_pred - y_batch)
                 self.update_all_weights()
@@ -324,11 +324,11 @@ It's on 12 points because there is a lot of functions to fill but also we want t
 To have all the point your neural network needs to have a Test accuracy > 92 % !!
 """
 
-minibatch_size = 5 
-nepoch = 10
+minibatch_size = 20
+nepoch = 20
 learning_rate = 0.01
 
-ffnn = FFNN(config=[784, 3, 3, 10], minibatch_size=minibatch_size, learning_rate=learning_rate)
+ffnn = FFNN(config=[784, 20, 20, 10], minibatch_size=minibatch_size, learning_rate=learning_rate)
 
 if __name__ == "__main__":
 
@@ -395,3 +395,27 @@ Also explain how the neural network behave when changing them ?
 TODO
 """
 
+# I managed to have more than 92% of accuracy with 2 different configs :
+
+#config=[784, 500, 500, 10], minibatch_size = 5, nepoch = 5, learning_rate = 0.01 était la première et j'ai pu dépasser les 93% d'accuracy sur le test accuracy avec seulement 5 epoch. Cependant le training est extrêmement long je n'ai donc pas été plus loin.
+
+#config=[784, 20, 20, 10], minibatch_size = 20, nepoch = 20, learning_rate = 0.01 est celle actuelle et qui me permet d'atteindre 92,6 % d'accuracy, elle est beaucoup plus rapide à train et c'est donc pour cette raison que je l'ai gardé.
+
+
+# - minibatch_size 
+
+# this parameter have a strong influence on the test and training accuracy, when minibatch_size is bigger the accuracy is better way faster. Indeed, I didn't need as many hidden layers to reach more than 92% of accuracy
+
+# - nepoch
+
+# this parameter varies depending on how much training your config needs. Some config need more training than others like my 2 examples
+
+# - config
+
+#Changing the hidden layers has a huge impact on the accuracy. The more hidden layers you have the more accurate is your model. However it takes really long to train your model.
+
+# - learning rate
+
+# The learning rate doesn't need to be too low or to high, we notice that the acuracy is crashing if it's too low (learning_rate = 0.001) or too high (learning_rate = 1)
+
+# Conclusion : The number of hidden layers in config and the minibatch_size are the two parameters to play with to increase the accuracy. In order to have a model that doesn't need a too long training it's better to increase the minibatch_size and have a lower number of hidden layers in config.
