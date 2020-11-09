@@ -377,8 +377,6 @@ for i in range(0, nsample):
         plot_one_image(X_demo, y_true, i)
         print("This an example of miss prediction with prediction =", prediction, "and true_target =", true_target)
         break
-        #TODO
-        pass
 
 """## Open analysis
 
