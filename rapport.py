@@ -97,7 +97,7 @@ plot_one_image(X_test, y_test , 250)
 
 # It's important to normalize the data before feeding it into the neural network
 def normalize_data(dataset: np.array) -> np.array:
-    normalized_dataset = (dataset-np.min(dataset))/(np.max(dataset)-np.min(dataset)) # = dataset/255
+    normalized_dataset = dataset/255
     return normalized_dataset
 
 normalized_data_value = normalize_data(mnist_data)
@@ -144,11 +144,10 @@ def d_sigmoid(M: np.array)-> np.array:
     return dz
 
 def softmax(X: np.array)-> np.array:
-    numerator = np.exp(X)
-    denominator = np.sum(numerator)
-    softmax = numerator/denominator
-
-    return softmax
+    exp_X = np.exp(X)
+    sum_exp = np.sum(np.exp(X),axis=1).reshape(-1,1)
+    
+    return exp_X/sum_exp
 
 softmax(np.array([[1, 2, 4], [4, 1, 10]]))
 
@@ -334,15 +333,15 @@ ffnn = FFNN(config=[784, 3, 3, 10], minibatch_size=minibatch_size, learning_rate
 
 if __name__ == "__main__":
 
-  assert X_train.shape[0] % minibatch_size == 0
-  assert X_test.shape[0] % minibatch_size == 0
+    assert X_train.shape[0] % minibatch_size == 0
+    assert X_test.shape[0] % minibatch_size == 0
 
-  X_train = normalize_data(X_train)
-  y_train = target_to_one_hot(y_train)
-  X_test = normalize_data(X_test)
-  y_test = target_to_one_hot(y_test)
+    X_train = normalize_data(X_train)
+    y_train = target_to_one_hot(y_train)
+    X_test = normalize_data(X_test)
+    y_test = target_to_one_hot(y_test)
 
-  err = ffnn.train(nepoch, X_train, y_train, X_test, y_test)
+    err = ffnn.train(nepoch, X_train, y_train, X_test, y_test)
 
 """## Error analysis (2 pts)
 
@@ -353,33 +352,33 @@ It will help us understand why the neural network failed sometimes to classify i
 
 if __name__ == "__main__":
 
-  nsample = 1000
+    nsample = 1000
 
-  X_test = normalize_data(X_test)
-  y_test = target_to_one_hot(y_test)
+    X_test = normalize_data(X_test)
+    y_test = target_to_one_hot(y_test)
 
-  X_demo = X_test[:nsample,:]
-  y_demo = ffnn.forward_pass(X_demo)
-  y_true = y_test[:nsample,:]
+    X_demo = X_test[:nsample,:]
+    y_demo = ffnn.forward_pass(X_demo)
+    y_true = y_test[:nsample,:]
 
-  index_to_plot = 50 
-  plot_one_image(X_demo, y_true, index_to_plot)
+    index_to_plot = 50 
+    plot_one_image(X_demo, y_true, index_to_plot)
 
-  # Compare to the prediction 
-  prediction = np.argmax(y_demo[index_to_plot,:])
-  true_target = np.argmax(y_true[index_to_plot,:])
+    # Compare to the prediction 
+    prediction = np.argmax(y_demo[index_to_plot,:])
+    true_target = np.argmax(y_true[index_to_plot,:])
 
-  # is it the same number ? 
-  print("Prediction is ",prediction, " and true_target is ", true_target)
-  # The number is different
+    # is it the same number ? 
+    print("Prediction is ",prediction, " and true_target is ", true_target)
+    # The number is different
 
-  for i in range(0, nsample):   
-    prediction = np.argmax(y_demo[i,:]) # Todo
-    true_target = np.argmax(y_true[i,:]) # Todo
-    if prediction != true_target:
-        plot_one_image(X_demo, y_true, i)
-        print("This an example of miss prediction with prediction =", prediction, "and true_target =", true_target)
-        break
+    for i in range(0, nsample):   
+      prediction = np.argmax(y_demo[i,:]) # Todo
+      true_target = np.argmax(y_true[i,:]) # Todo
+      if prediction != true_target:
+          plot_one_image(X_demo, y_true, i)
+          print("This an example of miss prediction with prediction =", prediction, "and true_target =", true_target)
+          break
 
 """## Open analysis
 
