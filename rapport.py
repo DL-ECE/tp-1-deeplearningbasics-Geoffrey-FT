@@ -243,9 +243,11 @@ class FFNN:
         # TODO: Compute the D matrix for all the layers (excluding the first one which corresponds to the input itself)
         # (you should only use self.layers[1:])
         for i in range((self.nlayers)-1, 0, -1):
-            cur_layer = self.layers[i]
             prev_layer = self.layers[i-1] 
+            cur_layer = self.layers[i]
             _ = self.one_step_backward(prev_layer, cur_layer)
+
+        return self.layers[0].D
 
       
 
@@ -365,7 +367,7 @@ prediction = np.argmax(y_demo[index_to_plot,:])
 true_target = np.argmax(y_true[index_to_plot,:])
 
 # is it the same number ? 
-print("Rrediction is ",prediction, " and true_target is ", true_target)
+print("Prediction is ",prediction, " and true_target is ", true_target)
 # The number is different
 
 # loop arround the demo test set and try to find a miss prediction
