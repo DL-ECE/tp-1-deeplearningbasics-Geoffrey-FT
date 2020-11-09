@@ -242,11 +242,12 @@ class FFNN:
         self.layers[-1].D = D_out.T
         # TODO: Compute the D matrix for all the layers (excluding the first one which corresponds to the input itself)
         # (you should only use self.layers[1:])
-        for i in range((self.nlayers)-1, 1):
+        for i in range((self.nlayers)-1, 0, -1):
             cur_layer = self.layers[i]
             prev_layer = self.layers[i-1] 
-
             _ = self.one_step_backward(prev_layer, cur_layer)
+
+      
 
         
     
@@ -259,8 +260,11 @@ class FFNN:
     
     def update_all_weights(self)-> None:
         # TODO: Update all W matrix using the update_weights function
-        for i in range(0, (self.nlayers)):
-            next_layer = self.update_weights(cur_layer[i], next_layer[i])
+        for i in range(0, (self.nlayers)-1):
+            cur_layer = self.layers[i]
+            next_layer = self.layers[i+1]
+            
+            _ = self.update_weights(cur_layer, next_layer)
        
       
     def get_error(self, y_pred: np.array, y_batch: np.array)-> float:
@@ -270,7 +274,7 @@ class FFNN:
 
         for i in range (0, len(y_pred)):
             if argmax(y_pred[i] == argmax(y_batch[i])):
-              sum = sum + 1
+                sum = sum + 1
 
         return sum
     
@@ -370,11 +374,11 @@ for i in range(0, nsample):
     prediction = np.argmax(y_demo[i,:]) # Todo
     true_target = np.argmax(y_true[i,:]) # Todo
     if prediction != true_target:
-      plot_one_image(X_demo, y_true, i)
-      print("This an example of miss prediction with prediction =", prediction, "and true_target =", true_target)
-      break
-      
-      pass
+        plot_one_image(X_demo, y_true, i)
+        print("This an example of miss prediction with prediction =", prediction, "and true_target =", true_target)
+        break
+
+        pass
 
 """## Open analysis
 
