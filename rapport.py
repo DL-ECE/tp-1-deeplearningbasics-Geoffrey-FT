@@ -144,7 +144,6 @@ def d_sigmoid(M: np.array)-> np.array:
     return dz
 
 def softmax(X: np.array)-> np.array:
-    #s = softmax(X, axis=0)
     numerator = np.exp(X)
     denominator = np.sum(numerator)
     softmax = numerator/denominator
@@ -333,15 +332,17 @@ learning_rate = 0.01
 
 ffnn = FFNN(config=[784, 3, 3, 10], minibatch_size=minibatch_size, learning_rate=learning_rate)
 
-assert X_train.shape[0] % minibatch_size == 0
-assert X_test.shape[0] % minibatch_size == 0
+if __name__ == "__main__":
 
-X_train = normalize_data(X_train)
-y_train = target_to_one_hot(y_train)
-X_test = normalize_data(X_test)
-y_test = target_to_one_hot(y_test)
+  assert X_train.shape[0] % minibatch_size == 0
+  assert X_test.shape[0] % minibatch_size == 0
 
-err = ffnn.train(nepoch, X_train, y_train, X_test, y_test)
+  X_train = normalize_data(X_train)
+  y_train = target_to_one_hot(y_train)
+  X_test = normalize_data(X_test)
+  y_test = target_to_one_hot(y_test)
+
+  err = ffnn.train(nepoch, X_train, y_train, X_test, y_test)
 
 """## Error analysis (2 pts)
 
@@ -350,37 +351,35 @@ Here we use a subset of the test data to try and find some miss classification.
 It will help us understand why the neural network failed sometimes to classify images.
 """
 
-nsample = 1000
+if __name__ == "__main__":
 
-X_test = normalize_data(X_test)
-y_test = target_to_one_hot(y_test)
+  nsample = 1000
 
-X_demo = X_test[:nsample,:]
-y_demo = ffnn.forward_pass(X_demo)
-y_true = y_test[:nsample,:]
+  X_test = normalize_data(X_test)
+  y_test = target_to_one_hot(y_test)
 
-index_to_plot = 50 
-plot_one_image(X_demo, y_true, index_to_plot)
+  X_demo = X_test[:nsample,:]
+  y_demo = ffnn.forward_pass(X_demo)
+  y_true = y_test[:nsample,:]
 
-# Compare to the prediction 
-prediction = np.argmax(y_demo[index_to_plot,:])
-true_target = np.argmax(y_true[index_to_plot,:])
+  index_to_plot = 50 
+  plot_one_image(X_demo, y_true, index_to_plot)
 
-# is it the same number ? 
-print("Prediction is ",prediction, " and true_target is ", true_target)
-# The number is different
+  # Compare to the prediction 
+  prediction = np.argmax(y_demo[index_to_plot,:])
+  true_target = np.argmax(y_true[index_to_plot,:])
 
-# loop arround the demo test set and try to find a miss prediction
+  # is it the same number ? 
+  print("Prediction is ",prediction, " and true_target is ", true_target)
+  # The number is different
 
-for i in range(0, nsample):   
+  for i in range(0, nsample):   
     prediction = np.argmax(y_demo[i,:]) # Todo
     true_target = np.argmax(y_true[i,:]) # Todo
     if prediction != true_target:
         plot_one_image(X_demo, y_true, i)
         print("This an example of miss prediction with prediction =", prediction, "and true_target =", true_target)
         break
-     
-pass
 
 """## Open analysis
 
